@@ -1,6 +1,6 @@
-# Eco Yachts — Sustainable Yacht Charter Platform
+# AeroX — Drone Marketing, Shop & CMS Platform
 
-A production-grade web platform for a sustainable yacht charter business, built with **Next.js 16 (App Router)**, **React 19**, and **TypeScript**. The project ships a full public-facing marketing/booking site alongside a self-service **admin dashboard (CMS)** that lets non-technical staff manage every piece of content — hero banners, yacht listings, destinations, blog, testimonials, staff, and more — without touching code.
+A production-grade web platform for **AeroX**, a consumer drone brand ("*Engineered for What's Next.*"). Built with **Next.js 16 (App Router)**, **React 19**, and **TypeScript**, it combines a public marketing + e‑commerce storefront with a full self-service **admin dashboard (CMS)** so non-technical staff can manage every piece of site content — hero banners, products, blog, gallery, testimonials, staff, roles, and more — without touching code.
 
 ---
 
@@ -9,16 +9,16 @@ A production-grade web platform for a sustainable yacht charter business, built 
 | | |
 |---|---|
 | **Type** | Full-stack frontend (Next.js) consuming a REST API |
-| **Audience** | Public marketing/booking site + internal content-management dashboard |
-| **Stack** | Next.js 16, React 19, TypeScript, Tailwind CSS 4, Redux Toolkit |
+| **Audience** | Public marketing/e‑commerce site + internal content-management dashboard |
+| **Stack** | Next.js 16, React 19, TypeScript, Tailwind CSS 4, Redux Toolkit (RTK Query) |
 | **Rendering** | App Router with route groups for layout separation |
 
 The codebase is organized into two clearly separated experiences under a single Next.js App Router instance:
 
-- **`(withCommonLayout)`** — the public site: Home, Yachts, Destinations, Contact, Privacy Policy, Terms & Conditions, Refund Policy.
-- **`(dashboardLayout)`** — the internal CMS: authenticated staff tooling for managing every content type on the public site (hero sections, yachts/services, destinations/chambers, blog, gallery, video gallery, testimonials, FAQs, employees, roles/permissions, appointments, and account settings).
+- **`(withCommonLayout)`** — the public site: Home, Shop, About (story, sustainability, portfolio, careers, news, partners, offices/people), Blog, Contact, Features, Privacy Policy, Terms & Conditions, Refund Policy.
+- **`(dashboardLayout)`** — the internal CMS: authenticated staff tooling for managing every content type on the public site (hero sections, products & categories, orders & payments, blog & categories, gallery, video gallery & categories, testimonials, client video reviews, events, experiences, portfolio, innovation concepts, FAQs/Q&A, employees, roles & permissions, and account settings).
 
-This route-group pattern keeps public and authenticated experiences on independent layouts, navigation, and data-fetching strategies while sharing the same build and deployment pipeline.
+Authentication (`/login`, `/signup`, `/otp`) lives outside both layouts. This route-group pattern keeps public, authenticated, and CMS experiences on independent layouts, navigation, and data-fetching strategies while sharing the same build and deployment pipeline.
 
 ---
 
@@ -30,19 +30,21 @@ This route-group pattern keeps public and authenticated experiences on independe
 - [TypeScript 5](https://www.typescriptlang.org/) — strict typing across pages, components, hooks, and API layer
 
 **State & Data**
-- [Redux Toolkit](https://redux-toolkit.js.org/) + `react-redux` — global state
+- [Redux Toolkit](https://redux-toolkit.js.org/) (RTK Query) + `react-redux` — global state and API caching, with one API slice per resource under `src/redux/api/` (products, cart, wishlist, orders, payments, blog, gallery, testimonials, roles, etc.)
 - `redux-persist` — persisted client state (e.g. auth session)
-- [Axios](https://axios-http.com/) — typed HTTP client / API service layer
+- [Axios](https://axios-http.com/) — typed HTTP client (`src/helpers/axiosInstance.ts`) with an RTK Query `axiosBaseQuery` adapter
 - `js-cookie` / `cookies-next` — cookie-based session handling
-- `jwt-decode` — client-side token inspection
+- `jwt-decode` — client-side token inspection, used by the auth middleware
 
 **UI & Forms**
 - [Tailwind CSS 4](https://tailwindcss.com/) — utility-first styling
+- [Framer Motion](https://www.framer.com/motion/) — page/section animation
 - [react-hook-form](https://react-hook-form.com/) — form state and validation
 - [react-datepicker](https://reactdatepicker.com/), `react-paginate`, `lucide-react`, `react-icons`
 - `sweetalert2`, `react-toastify` — user feedback / alerts
 - `recharts` — dashboard analytics and charts
-- `html2canvas` + `jspdf` — client-side document/PDF export (e.g. prescriptions)
+- `html2canvas` + `jspdf` — client-side document/PDF export
+- `socket.io-client` — real-time support chat (dashboard "Support Chat" + `useChatSocket` hook)
 
 **Tooling**
 - ESLint 9 (flat config) with `eslint-config-next`
@@ -55,38 +57,46 @@ This route-group pattern keeps public and authenticated experiences on independe
 ```
 src/
 ├── app/
-│   ├── (withCommonLayout)/     # Public site: yachts, destinations, contact, legal pages
+│   ├── (withCommonLayout)/     # Public site: home, shop, about, blog, contact, legal pages
 │   ├── (dashboardLayout)/
 │   │   └── dashboard/          # Admin CMS: content management for every public section
-│   ├── login/ signup/ otp/     # Authentication flows
-│   └── prescription/[token]/   # Tokenized, shareable document view
+│   ├── login/ signup/ otp/     # Authentication flows (outside both layouts)
+│   ├── layout.tsx              # Root layout, fonts, SEO metadata
+│   └── proxy.ts → src/proxy.ts # Auth/route-protection middleware
 ├── components/
-│   ├── Common/                 # Shared form controls, modals, auth UI
-│   ├── Shared/                 # Navbar, Footer, PageHero, Logo
+│   ├── Common/                 # Shared form controls, modals, auth UI, rich-text editor
+│   ├── Shared/                 # Navbar, Footer, PageHero, Logo, mobile nav/menu, chat widget
 │   └── Ui/
-│       ├── HomePage/           # Hero, Destinations, Featured Yachts, Sustainability, FAQ, etc.
+│       ├── HomePage/           # Hero, destinations, featured products, sustainability, FAQ, etc.
+│       ├── AboutPage/ ContactPage/ YachtsPage/ YachtDetail/ PrivacyPolicy/
 │       └── Dashboard/          # CMS modules, one per content type (mirrors app/dashboard routes)
 ├── redux/
-│   ├── api/                    # RTK Query / API slice definitions
-│   └── features/auth/          # Auth state slice
-├── services/                   # API service functions (Axios)
-├── hooks/                      # Custom React hooks
-├── helpers/ lib/ utils/        # Utilities, providers, shared constants/data
-└── types/                      # Shared TypeScript types
+│   ├── api/                    # RTK Query API slices (one per resource)
+│   ├── features/auth/          # Auth state slice
+│   ├── store.ts / rootReducer.ts / hooks.ts
+├── services/                   # Axios-based API service functions (e.g. token refresh)
+├── hooks/                      # Custom React hooks (debounce, infinite scroll, chat socket, token verify)
+├── helpers/ lib/ utils/        # Axios instance, providers, icon sets, PDF export, pagination, slugify
+├── constants/                  # Centralized data (e.g. curated stock imagery)
+└── types/                      # Shared TypeScript types (products, orders, blog, gallery, roles, etc.)
 ```
 
 Each CMS module under `dashboard/` follows a consistent **add / all / edit** pattern (e.g. `hero/add-hero`, `hero/all-hero`, `hero/edit-hero/[id]`), giving content editors a predictable CRUD workflow across every content type.
+
+> **Note:** parts of the codebase (some component/folder names such as `Yachts`, `FeaturedYachtsSection`) were carried over from an earlier template and are being renamed to match the AeroX domain incrementally — functionality is unaffected.
 
 ---
 
 ## Key Features
 
-- **Public marketing & booking site** — yacht search, destination browsing, featured yachts, sustainability messaging, testimonials, and a contact/inquiry flow.
-- **Full CMS/admin dashboard** — role-based staff access to manage hero content, yachts/services, destinations, blog (with categories), gallery and video gallery, testimonials, FAQs (Q&A), employees, and appointments — no code changes required to update the live site.
-- **Authentication** — email/OTP-based signup and login, JWT session handling, protected dashboard routes.
-- **Role & permission management** — configurable staff roles for dashboard access control.
-- **Document generation** — client-side PDF export (e.g. prescriptions) via `html2canvas` + `jspdf`, including tokenized public share links.
-- **Optimized media delivery** — Next.js `Image` component with remote patterns configured for Cloudinary and other CDNs.
+- **Public marketing & storefront** — product showcase (AeroX Max Pro and related gear), shop/browse, cart, wishlist, checkout/orders, sustainability messaging, testimonials, and a contact/inquiry flow.
+- **Full CMS/admin dashboard** — role-based staff access to manage hero content, products & categories, orders & payments, blog (posts, details, categories), gallery and video gallery, testimonials & client video reviews, events, experiences, portfolio, innovation concepts, FAQs (Q&A), employees, and roles/permissions — no code changes required to update the live site.
+- **Authentication** — email/OTP-based signup and login, JWT session handling (access + refresh token), route-level protection via middleware (`src/proxy.ts`) that gates `/dashboard` on staff/super-admin claims.
+- **Role & permission management** — configurable staff roles with a live permission matrix, enforced client-side (sidebar filtering) and server-side.
+- **Real-time support chat** — Socket.IO-powered chat widget on the public site with a corresponding CMS inbox.
+- **Document generation** — client-side PDF export via `html2canvas` + `jspdf`.
+- **Optimized media delivery** — Next.js `Image` component with remote patterns configured for Cloudinary, Unsplash, and YouTube thumbnails.
+- **SEO-ready** — centralized metadata (Open Graph, Twitter cards, canonical URL, robots) in `src/app/layout.tsx`.
 
 ---
 
@@ -117,7 +127,7 @@ NEXT_PUBLIC_API_URL=https://your-api-host/api
 npm run dev
 ```
 
-Visit [http://localhost:3000](http://localhost:3000) for the public site, and `/dashboard` for the CMS (requires authentication).
+Visit [http://localhost:3000](http://localhost:3000) for the public site, and `/dashboard` for the CMS (requires staff/super-admin authentication).
 
 ### Production Build
 
@@ -136,7 +146,7 @@ npm run lint
 
 ## Deployment
 
-The app builds as a standard Next.js application and deploys cleanly to [Vercel](https://vercel.com/) or any Node-compatible host. Ensure `NEXT_PUBLIC_API_URL` and any additional remote image hostnames (see `next.config.ts` → `images.remotePatterns`) are configured per environment.
+The app builds as a standard Next.js application and deploys cleanly to [Vercel](https://vercel.com/) or any Node-compatible host. Ensure `NEXT_PUBLIC_API_URL` and any additional remote image hostnames (see `next.config.ts` → `images.remotePatterns`) are configured per environment. Before going live, replace the placeholder domain (`aerox-drones.com`) in `src/app/layout.tsx` metadata with the real production domain.
 
 ---
 
