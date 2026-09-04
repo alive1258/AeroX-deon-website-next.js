@@ -1,53 +1,86 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Quote, Star } from "lucide-react";
+import { ArrowRight, Quote, Star, User } from "lucide-react";
 import SlideUp from "@/src/components/Common/Animaation/SlideUp";
 import { TESTIMONIAL_AVATARS } from "@/src/constants/droneImages";
+import type { ApiResponse } from "@/src/types/axios";
+import type { TestimonialItem } from "@/src/types/testimonialType";
 
-interface Testimonial {
-  name: string;
-  role: string;
-  quote: string;
-  avatar: string;
-  rating: number;
-}
-
-const TESTIMONIALS: Testimonial[] = [
+const FALLBACK_TESTIMONIALS: TestimonialItem[] = [
   {
+    id: "fallback-1",
     name: "Jason Miller",
-    role: "Travel Filmmaker",
-    quote: "AeroX Max Pro changed the way I capture the world.",
-    avatar: TESTIMONIAL_AVATARS.daniel,
+    designation: "Travel Filmmaker",
+    description: "AeroX Max Pro changed the way I capture the world.",
+    image: TESTIMONIAL_AVATARS.daniel,
     rating: 5,
+    position: 1,
+    is_active: true,
+    created_at: "",
+    updated_at: "",
   },
   {
+    id: "fallback-2",
     name: "Amelia Cross",
-    role: "Landscape Photographer",
-    quote: "The gimbal stabilization is unreal — every clip is buttery smooth.",
-    avatar: TESTIMONIAL_AVATARS.amelia,
+    designation: "Landscape Photographer",
+    description:
+      "The gimbal stabilization is unreal — every clip is buttery smooth.",
+    image: TESTIMONIAL_AVATARS.amelia,
     rating: 5,
+    position: 2,
+    is_active: true,
+    created_at: "",
+    updated_at: "",
   },
   {
+    id: "fallback-3",
     name: "Marcus Webb",
-    role: "Real Estate Agent",
-    quote: "Waypoint flight makes property tours look like a Hollywood shoot.",
-    avatar: TESTIMONIAL_AVATARS.marcus,
+    designation: "Real Estate Agent",
+    description:
+      "Waypoint flight makes property tours look like a Hollywood shoot.",
+    image: TESTIMONIAL_AVATARS.marcus,
     rating: 5,
+    position: 3,
+    is_active: true,
+    created_at: "",
+    updated_at: "",
   },
   {
+    id: "fallback-4",
     name: "Sophia Reyes",
-    role: "Adventure Vlogger",
-    quote: "30 minutes of flight time means I never miss the golden hour shot.",
-    avatar: TESTIMONIAL_AVATARS.sophia,
+    designation: "Adventure Vlogger",
+    description:
+      "30 minutes of flight time means I never miss the golden hour shot.",
+    image: TESTIMONIAL_AVATARS.sophia,
     rating: 5,
+    position: 4,
+    is_active: true,
+    created_at: "",
+    updated_at: "",
   },
 ];
 
-const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => (
+async function getActiveTestimonials(): Promise<TestimonialItem[]> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/testimonials/active`,
+      { next: { revalidate: 60 } },
+    );
+
+    if (!res.ok) return [];
+
+    const body: ApiResponse<TestimonialItem[]> = await res.json();
+    return body.data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+const TestimonialCard = ({ testimonial }: { testimonial: TestimonialItem }) => (
   <div className="w-[260px] shrink-0 rounded-2xl border border-white/10 bg-ink-950 p-6 sm:w-[320px]">
     <Quote size={22} className="text-orange-500/60" />
     <p className="mt-4 line-clamp-3 text-sm leading-relaxed text-white/70">
-      &ldquo;{testimonial.quote}&rdquo;
+      &ldquo;{testimonial.description}&rdquo;
     </p>
     <div className="mt-4 flex gap-1 text-orange-400">
       {Array.from({ length: testimonial.rating }).map((_, i) => (
@@ -55,18 +88,35 @@ const TestimonialCard = ({ testimonial }: { testimonial: Testimonial }) => (
       ))}
     </div>
     <div className="mt-4 flex items-center gap-3 border-t border-white/10 pt-4">
-      <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full">
-        <Image src={testimonial.avatar} alt={testimonial.name} fill sizes="36px" className="object-cover" />
-      </span>
+      {testimonial.image ? (
+        <span className="relative h-9 w-9 shrink-0 overflow-hidden rounded-full">
+          <Image
+            src={testimonial.image}
+            alt={testimonial.name}
+            fill
+            sizes="36px"
+            className="object-cover"
+          />
+        </span>
+      ) : (
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/10 text-white/60">
+          <User size={15} />
+        </span>
+      )}
       <div className="text-left">
         <p className="text-sm font-bold text-white">{testimonial.name}</p>
-        <p className="text-xs text-white/50">{testimonial.role}</p>
+        {testimonial.designation && (
+          <p className="text-xs text-white/50">{testimonial.designation}</p>
+        )}
       </div>
     </div>
   </div>
 );
 
-const TestimonialsSection = () => {
+const TestimonialsSection = async () => {
+  const fetched = await getActiveTestimonials();
+  const testimonials = fetched.length ? fetched : FALLBACK_TESTIMONIALS;
+
   return (
     <section className="overflow-hidden bg-ink-900 py-16 md:py-24">
       <div className="container mb-12 flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
@@ -89,8 +139,8 @@ const TestimonialsSection = () => {
 
       <div className="testimonial-fade overflow-hidden">
         <div className="flex w-max gap-6 animate-testimonial-left">
-          {[...TESTIMONIALS, ...TESTIMONIALS].map((t, i) => (
-            <TestimonialCard key={`${t.name}-${i}`} testimonial={t} />
+          {[...testimonials, ...testimonials].map((t, i) => (
+            <TestimonialCard key={`${t.id}-${i}`} testimonial={t} />
           ))}
         </div>
       </div>

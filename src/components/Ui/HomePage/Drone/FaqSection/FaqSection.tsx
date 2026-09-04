@@ -1,7 +1,27 @@
 import SlideUp from "@/src/components/Common/Animaation/SlideUp";
+import type { ApiResponse } from "@/src/types/axios";
+import type { QuestionAnswer } from "@/src/redux/api/questionAnswerApi";
 import FaqAccordion from "./FaqAccordion";
 
-const FaqSection = () => {
+async function getActiveFaqs(): Promise<QuestionAnswer[]> {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/question-answers/active`,
+      { next: { revalidate: 60 } },
+    );
+
+    if (!res.ok) return [];
+
+    const body: ApiResponse<QuestionAnswer[]> = await res.json();
+    return body.data ?? [];
+  } catch {
+    return [];
+  }
+}
+
+const FaqSection = async () => {
+  const faqs = await getActiveFaqs();
+
   return (
     <section id="faq" className="scroll-mt-[100px] bg-ink-950 py-16 md:py-24">
       <div className="container max-w-3xl">
@@ -15,7 +35,7 @@ const FaqSection = () => {
         </SlideUp>
 
         <SlideUp delay={2}>
-          <FaqAccordion />
+          <FaqAccordion faqs={faqs} />
         </SlideUp>
       </div>
     </section>
