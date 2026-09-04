@@ -1,17 +1,17 @@
 # AeroX — Drone Marketing, Shop & CMS Platform
 
-A production-grade web platform for **AeroX**, a consumer drone brand ("*Engineered for What's Next.*"). Built with **Next.js 16 (App Router)**, **React 19**, and **TypeScript**, it combines a public marketing + e‑commerce storefront with a full self-service **admin dashboard (CMS)** so non-technical staff can manage every piece of site content — hero banners, products, blog, gallery, testimonials, staff, roles, and more — without touching code.
+A production-grade web platform for **AeroX**, a consumer drone brand ("_Engineered for What's Next._"). Built with **Next.js 16 (App Router)**, **React 19**, and **TypeScript**, it combines a public marketing + e‑commerce storefront with a full self-service **admin dashboard (CMS)** so non-technical staff can manage every piece of site content — hero banners, products, blog, gallery, testimonials, staff, roles, and more — without touching code.
 
 ---
 
 ## Overview
 
-| | |
-|---|---|
-| **Type** | Full-stack frontend (Next.js) consuming a REST API |
-| **Audience** | Public marketing/e‑commerce site + internal content-management dashboard |
-| **Stack** | Next.js 16, React 19, TypeScript, Tailwind CSS 4, Redux Toolkit (RTK Query) |
-| **Rendering** | App Router with route groups for layout separation |
+|               |                                                                             |
+| ------------- | --------------------------------------------------------------------------- |
+| **Type**      | Full-stack frontend (Next.js) consuming a REST API                          |
+| **Audience**  | Public marketing/e‑commerce site + internal content-management dashboard    |
+| **Stack**     | Next.js 16, React 19, TypeScript, Tailwind CSS 4, Redux Toolkit (RTK Query) |
+| **Rendering** | App Router with route groups for layout separation                          |
 
 The codebase is organized into two clearly separated experiences under a single Next.js App Router instance:
 
@@ -25,11 +25,13 @@ Authentication (`/login`, `/signup`, `/otp`) lives outside both layouts. This ro
 ## Tech Stack
 
 **Core**
+
 - [Next.js 16](https://nextjs.org/) — App Router, file-based routing, image optimization, server/client component split
 - [React 19](https://react.dev/)
 - [TypeScript 5](https://www.typescriptlang.org/) — strict typing across pages, components, hooks, and API layer
 
 **State & Data**
+
 - [Redux Toolkit](https://redux-toolkit.js.org/) (RTK Query) + `react-redux` — global state and API caching, with one API slice per resource under `src/redux/api/` (products, cart, wishlist, orders, payments, blog, gallery, testimonials, roles, etc.)
 - `redux-persist` — persisted client state (e.g. auth session)
 - [Axios](https://axios-http.com/) — typed HTTP client (`src/helpers/axiosInstance.ts`) with an RTK Query `axiosBaseQuery` adapter
@@ -37,6 +39,7 @@ Authentication (`/login`, `/signup`, `/otp`) lives outside both layouts. This ro
 - `jwt-decode` — client-side token inspection, used by the auth middleware
 
 **UI & Forms**
+
 - [Tailwind CSS 4](https://tailwindcss.com/) — utility-first styling
 - [Framer Motion](https://www.framer.com/motion/) — page/section animation
 - [react-hook-form](https://react-hook-form.com/) — form state and validation
@@ -47,6 +50,7 @@ Authentication (`/login`, `/signup`, `/otp`) lives outside both layouts. This ro
 - `socket.io-client` — real-time support chat (dashboard "Support Chat" + `useChatSocket` hook)
 
 **Tooling**
+
 - ESLint 9 (flat config) with `eslint-config-next`
 - `date-fns` for date formatting/manipulation
 
@@ -103,6 +107,7 @@ Each CMS module under `dashboard/` follows a consistent **add / all / edit** pat
 ## Getting Started
 
 ### Prerequisites
+
 - Node.js 18.18+ (recommended: latest LTS)
 - npm (project is committed with `package-lock.json`)
 - A running instance of the backend API

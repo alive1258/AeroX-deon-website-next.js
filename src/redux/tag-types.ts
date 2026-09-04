@@ -42,6 +42,16 @@ export const tagTypes: Record<string, string> = {
   bookings: "bookings",
   payments: "payments",
   chat: "chat",
+  performance: "performance",
+  capture_cards: "capture-cards",
+  flight_modes: "flight-modes",
+  gimbal_banner: "gimbal-banner",
+  durability: "durability",
+  video_showcase: "video-showcase",
+  accessories_banner: "accessories-banner",
+  preorder_banner: "preorder-banner",
+  product_bundles: "product-bundles",
+  shop_accessories: "shop-accessories",
 };
 
 export const tagTypesList: string[] = [
@@ -88,4 +98,14 @@ export const tagTypesList: string[] = [
   tagTypes.bookings,
   tagTypes.payments,
   tagTypes.chat,
+  tagTypes.performance,
+  tagTypes.capture_cards,
+  tagTypes.flight_modes,
+  tagTypes.gimbal_banner,
+  tagTypes.durability,
+  tagTypes.video_showcase,
+  tagTypes.accessories_banner,
+  tagTypes.preorder_banner,
+  tagTypes.product_bundles,
+  tagTypes.shop_accessories,
 ];

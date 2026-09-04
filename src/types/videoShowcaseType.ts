@@ -1,0 +1,83 @@
+// ==========================================
+// 1. Core Entity Model
+// ==========================================
+export interface VideoShowcaseUserSummary {
+  id: string;
+  name?: string;
+  email?: string;
+  role?: string;
+}
+
+export interface VideoShowcaseItem {
+  id: string;
+  eyebrow?: string;
+  title: string;
+  image?: string;
+  video_url?: string;
+  thumbnails?: string[];
+  position: number;
+  is_active: boolean;
+  addedBy?: VideoShowcaseUserSummary;
+  created_at: string;
+  updated_at: string;
+  deleted_at?: string;
+}
+
+// ==========================================
+// 2. Request Payloads
+// ==========================================
+export interface UpdateVideoShowcaseRequest {
+  id: string;
+  data: FormData;
+}
+
+// ==========================================
+// 3. Query Parameters
+// ==========================================
+export interface VideoShowcaseQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  title?: string;
+  eyebrow?: string;
+  position?: number;
+  is_active?: boolean;
+  sort_by?: string;
+  sort_order?: "ASC" | "DESC";
+}
+
+// ==========================================
+// 4. API Response Wrappers
+// ==========================================
+export interface PaginationMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface PaginationLinks {
+  first?: string;
+  last?: string;
+  current?: string;
+  next?: string;
+  previous?: string;
+}
+
+export interface BaseApiResponse {
+  apiVersion?: string;
+  statusCode?: number;
+  status?: number;
+  success: boolean;
+  message: string;
+}
+
+export interface SingleVideoShowcaseResponse extends BaseApiResponse {
+  data: VideoShowcaseItem;
+}
+
+export interface VideoShowcasePaginatedResponse extends BaseApiResponse {
+  meta: PaginationMeta;
+  links?: PaginationLinks;
+  data: VideoShowcaseItem[];
+}
